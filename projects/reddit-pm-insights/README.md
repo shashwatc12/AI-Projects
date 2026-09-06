@@ -1,22 +1,42 @@
 # Reddit PM Insights Scraper
 
-Scrapes top posts from Product Management subreddits, filters for AI/automation themes, scores by engagement, and clusters results into actionable insights.
+Scrapes top posts from Product Management subreddits, identifies "actually built" AI tools & workflows (not just opinions), and extracts replicable PM implementations using Claude API.
 
-## What It Does
+**Goal:** Find real shipped tools that PMs have built, not discussion threads or trend takes.
 
-1. **Scrapes** top posts from r/ProductManagement, r/ProductManagers, r/AIProductManagement (past month)
-2. **Filters** for AI/automation keywords (agent, automation, LLM, tool, etc.)
-3. **Scores** posts by engagement (upvotes + weighted comments)
-4. **Analyzes** themes and clusters posts (AI Integration, Automation, Strategy, etc.)
-5. **Outputs** ranked CSV with title, link, score, theme
+## Pipeline
+
+### Step 1: Scrape Reddit (PRAW)
+- Top posts from r/ProductManagement, r/ProductManagers, r/AIProductManagement (past month)
+- Filter for AI/automation keywords (agent, automation, LLM, tool, etc.)
+- Score by engagement (upvotes + 0.3× comments)
+
+### Step 2: Theme Analysis
+- Cluster posts into themes: AI Integration, Automation, Strategy, User Research, Analytics, Team/Process
+- Show theme distribution and top posts per theme
+
+### Step 3: Extract "Actually Built" Tools (Claude API)
+- **Filter ruthlessly:** only keep posts with:
+  - "I built" / "I made" / "I automated" in text, OR
+  - GitHub/Replit/Streamlit/Vercel link, OR
+  - Concrete workflow with named tools
+- **Reject:** pure opinion/discussion posts, polls, career questions
+- **Extract via Claude:** what was built, stack used, repo link, build effort, replicability
+- **Sort:** replicable-in-a-week first, then by engagement
+- **Output:** markdown table ranked by buildability
 
 ## Quick Start
 
-### 1. Get Reddit API Credentials (2 min)
+### 1. Get API Credentials
 
+**Reddit API** (free, 2 min):
 - Go to https://reddit.com/prefs/apps
-- Click "Create app" → Select "script" type
+- Create app → Select "script" type
 - Note your **client_id** and **client_secret**
+
+**Claude API** (for tool extraction):
+- Get key from https://console.anthropic.com
+- Enables AI-powered classification of "actually built" vs. opinion posts
 
 ### 2. Setup Environment
 
@@ -30,32 +50,42 @@ pip install -r requirements.txt
 
 # Create .env file with credentials
 cp .env.example .env
-# Edit .env and add your Reddit API credentials
+# Edit .env and add:
+# REDDIT_CLIENT_ID=...
+# REDDIT_CLIENT_SECRET=...
+# ANTHROPIC_API_KEY=...
 ```
 
-### 3. Run Scraper
+### 3. Run Pipeline
 
 ```bash
-# Full pipeline (scrape + analyze)
+# Full pipeline: scrape + theme analysis + tool extraction
 python main.py
 
-# Custom subreddits
-python main.py --subreddits ArtificialIntelligence OpenAI
+# Skip Claude extraction (theme analysis only)
+python main.py --skip-extraction
 
-# Save to specific file
-python main.py --output custom_output.csv
+# Extract tools from existing CSV (e.g., from previous run)
+python main.py --extract-from data/reddit_pm_insights.csv
+
+# Custom subreddits
+python main.py --subreddits SideProject AIProductManagement
+
+# Custom output
+python main.py --output research/pm_tools.csv
 ```
 
 ## Output
 
-**CSV file** (`data/reddit_pm_insights.csv`):
+### 1. Theme Analysis CSV
+`data/reddit_pm_insights.csv` — all posts ranked by engagement:
 ```
 title | subreddit | url | score | comments | engagement_score | created_utc
 ---
-"How to implement AI agents in your product..." | ProductManagement | https://reddit.com/... | 245 | 67 | 265.1 | 2024-09-06...
+"I built a Slack bot that summarizes standups using GPT-4" | ProductManagement | https://reddit.com/... | 245 | 67 | 265.1 | 2024-09-06...
 ```
 
-**Console output** - Theme analysis:
+### 2. Theme Analysis Console Output
 ```
 THEME ANALYSIS SUMMARY
 ========================
@@ -70,9 +100,24 @@ Theme Distribution:
 
 Top Posts by Theme:
 📌 AI Integration
-   1. "Deploying Claude API in production..."
+   1. "I automated roadmap reviews with Claude API..."
       Score: 523 | ProductManagement
 ```
+
+### 3. Built Tools Markdown (AI-Extracted)
+`data/reddit_pm_insights_built_tools.md` — actionable PM tools:
+```
+| What Was Built | Stack | Repo/Demo | Effort | Replicable? | Why? |
+|---|---|---|---|---|---|
+| Slack bot: standup summarization → JIRA | Python, Claude API, Slack SDK | [Repo](github.com/...) [Demo](streamlit.app/...) | weekend project | ✅ Yes | Clear stack, standard libs, no complex infra |
+| BigQuery semantic layer UI | Python, Streamlit, BigQuery API | [Repo](github.com/...) | ongoing tool | ✅ Yes | Common PM data problem |
+| ...
+```
+
+**Top-ranked first** = buildable by a TPM with Python/SQL in <1 week.
+
+### 4. Built Tools CSV
+`data/reddit_pm_insights_built_tools.csv` — structured for further analysis
 
 ## Project Structure
 
