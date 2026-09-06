@@ -1,0 +1,61 @@
+{
+  "name": "AI-Projects",
+  "description": "Optimized configuration for AI/ML and data projects",
+  "permissions": {
+    "bash": {
+      "allowlist": [
+        "ls",
+        "find",
+        "grep",
+        "cat",
+        "head",
+        "tail",
+        "wc",
+        "git status",
+        "git log",
+        "git branch",
+        "git diff",
+        "git fetch",
+        "git pull",
+        "pwd",
+        "tree",
+        "which",
+        "python -m",
+        "pytest",
+        "black",
+        "flake8",
+        "mypy",
+        "pip list",
+        "source venv/bin/activate",
+        "echo"
+      ],
+      "denylist": [
+        "rm -rf",
+        "git reset --hard",
+        "git push --force"
+      ]
+    }
+  },
+  "tools": {
+    "bash_no_confirm": [
+      "ls",
+      "pwd",
+      "find",
+      "grep",
+      "git status",
+      "git log",
+      "git branch"
+    ]
+  },
+  "environment_variables": {
+    "PYTHONUNBUFFERED": "1",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "development": {
+    "python_version": "3.11+",
+    "testing_framework": "pytest",
+    "code_formatter": "black",
+    "linter": "flake8",
+    "type_checker": "mypy"
+  }
+}
