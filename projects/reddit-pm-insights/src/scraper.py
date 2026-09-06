@@ -16,11 +16,28 @@ from dotenv import load_dotenv
 class RedditPMScraper:
     """Scrape and analyze PM-related Reddit posts."""
 
-    # Keywords to filter for AI/automation themes
+    # Keywords to filter for AI PM OS + AI SDLC innovation
     AI_KEYWORDS = {
-        "ai", "agent", "automation", "gpt", "llm", "machine learning",
-        "neural", "algorithm", "tool", "claude", "openai", "embedding",
-        "langchain", "reasoning", "prompt", "autonomous"
+        # AI/LLM tech
+        "ai", "agent", "automation", "gpt", "llm", "claude", "openai",
+        "embedding", "langchain", "reasoning", "prompt", "autonomous",
+
+        # PM OS + workflows
+        "workflow", "automation", "specification", "spec generation",
+        "roadmap", "backlog", "planning", "sync", "status update",
+        "decision support", "data-driven", "jira", "linear", "asana",
+
+        # SDLC innovation
+        "sdlc", "development workflow", "engineering", "ci/cd", "release",
+        "code review", "testing", "test generation", "documentation",
+
+        # Process evolution
+        "scrum alternative", "kanban alternative", "agile", "lean",
+        "evidence-driven", "outcome-focused", "iterative",
+
+        # Quick-win signals
+        "built", "tool", "script", "automation", "saved time",
+        "productivity", "efficiency", "integration"
     }
 
     def __init__(self) -> None:

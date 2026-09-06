@@ -18,6 +18,7 @@ sys.path.insert(0, str(Path(__file__).parent / "src"))
 from scraper import RedditPMScraper
 from analyzer import ThemeAnalyzer
 from agent_extractor import BuiltToolsExtractor
+from research_agent import AIpmResearchAgent
 import pandas as pd
 
 
@@ -45,6 +46,11 @@ def main() -> None:
     parser.add_argument(
         "--extract-from",
         help="Extract tools from existing CSV file (alternative to scraping)"
+    )
+    parser.add_argument(
+        "--research",
+        action="store_true",
+        help="Run AI PM OS & SDLC research synthesis (requires ANTHROPIC_API_KEY)"
     )
 
     args = parser.parse_args()
@@ -97,10 +103,34 @@ def main() -> None:
         else:
             print("\n⏭️  Skipping tool extraction (--skip-extraction)")
 
+        # STEP 4: Research synthesis (AI PM OS + SDLC innovation)
+        if args.research:
+            print("\n🔬 Step 4: Synthesizing high-impact AI PM ideas...\n")
+            try:
+                research_agent = AIpmResearchAgent()
+                findings = research_agent.synthesize_research(df_results.to_dict('records'))
+
+                if findings:
+                    # Print to console
+                    AIpmResearchAgent.print_research_findings(findings)
+
+                    # Save memo
+                    memo_file = args.output.replace('.csv', '_research_memo.md')
+                    AIpmResearchAgent.save_research_memo(findings, memo_file)
+                else:
+                    print("\n⚠️  Research synthesis failed.")
+            except Exception as e:
+                print(f"\n⚠️  Research skipped: {str(e)}")
+                print("   (Ensure ANTHROPIC_API_KEY is set in .env)")
+        else:
+            print("\n⏭️  Skipping research synthesis (use --research flag)")
+
         print(f"\n✅ Research complete!")
         print(f"   📊 Theme analysis CSV: {args.output}")
         if not args.skip_extraction:
             print(f"   🛠️  Built tools markdown: {args.output.replace('.csv', '_built_tools.md')}")
+        if args.research:
+            print(f"   🔬 Research memo: {args.output.replace('.csv', '_research_memo.md')}")
 
     except Exception as e:
         print(f"❌ Error: {str(e)}")
